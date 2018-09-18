@@ -9,4 +9,4 @@ spec:
       - name: my-container
         resources:
           limit:
-            cpu: 1000m
+            cpu: 750m
