@@ -1,0 +1,10 @@
+namePrefix: production-
+commonLabels:
+  variant: production
+commonAnnotations:
+  note: Hello, I am production!
+bases:
+- ../../base
+patches:
+- replica_count.yaml
+- cpu_count.yaml

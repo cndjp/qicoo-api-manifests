@@ -1,0 +1,5 @@
+commonLabels:
+  app: myWord
+resources:
+- deployment.yaml
+- service.yaml

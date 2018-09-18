@@ -1,0 +1,10 @@
+namePrefix: develop-
+commonLabels:
+  variant: develop
+commonAnnotations:
+  note: Hello, I am development!
+bases:
+- ../../base
+patches:
+- replica_count.yaml
+- cpu_count.yaml
