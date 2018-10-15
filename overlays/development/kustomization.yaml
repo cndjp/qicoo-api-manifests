@@ -5,6 +5,6 @@ commonAnnotations:
   note: Hello, I am development!
 bases:
 - ../../base
-patches:
-- replica_count.yaml
-- cpu_count.yaml
+# patches:
+# - replica_count.yaml
+# - cpu_count.yaml

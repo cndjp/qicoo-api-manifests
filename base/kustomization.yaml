@@ -1,5 +1,7 @@
-commonLabels:
-  app: myWord
+namespace: qicoo
+
 resources:
-- deployment.yaml
-- service.yaml
+- 10-qicoo-mysql-secrets.yaml
+- 20-qicoo-mysql.yaml
+- 30-qicoo-redis.yaml
+- 40-qicoo-api.yaml

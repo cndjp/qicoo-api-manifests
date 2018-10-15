@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qicoo-mysql-configmap
+data:
+  qicoo-mysql.cnf: |
+    [mysqld]
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_unicode_ci
+  qicoo-mysql-init.sql: |
+    DROP DATABASE IF EXISTS qicoo;
+    CREATE DATABASE qicoo;
+    USE qicoo;
+
+    CREATE TABLE `questions` (
+      `id`         varchar(36) NOT NULL,
+      `object`     text,
+      `event_id`   text,
+      `program_id` text,
+      `username`   text,
+      `comment`    text,
+      `like_count` int(10) DEFAULT NULL,
+      `created_at` datetime DEFAULT NULL,
+      `updated_at` datetime DEFAULT NULL,
+      PRIMARY KEY (`id`),
+      KEY `event_id` (`event_id`(40),`program_id`(40))
+    )
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qicoo-mysql
+  labels:
+    app: qicoo-mysql
+spec:
+  ports:
+  - port: 3306
+  clusterIP: None
+  selector:
+    app: qicoo-mysql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qicoo-mysql
+spec:
+  selector:
+    matchLabels:
+      app: qicoo-mysql
+  serviceName: qicoo-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: qicoo-mysql
+    spec:
+      initContainers:
+      - name: configure-mysql
+        image: busybox:1
+        command: ['/bin/sh', '-c']
+        args: ['cp /mnt/configmap/qicoo-mysql.cnf /mnt/conf.d/']
+        volumeMounts:
+        - name: conf
+          mountPath: /mnt/conf.d
+        - name: qicoo-mysql-configmap
+          mountPath: /mnt/configmap
+      containers:
+      - name: qicoo-mysql
+        image: mysql:5.6.27
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: qicoo-mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command: ["mysqladmin", "ping"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: conf
+          mountPath: /etc/mysql/conf.d
+      volumes:
+      - name: conf
+        emptyDir: {}
+      - name: qicoo-mysql-configmap
+        configMap:
+          name: qicoo-mysql-configmap
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qicoo-mysqldb-init
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: wait-for-qicoo-mysql
+        image: mysql:5.6.27
+        command: ['/bin/sh', '-c']
+        args: ['until mysqladmin ping -hqicoo-mysql -uroot -p$DB_PASSWORD; do echo waiting for mysqldb; sleep 2; done;']
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: qicoo-mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+      containers:
+      - name: qicoo-mysql-init
+        image: mysql:5.6.27
+        command: ["/bin/sh", "-c"]
+        args: ['mysql -hqicoo-mysql -uroot -p$DB_PASSWORD < /mnt/configmap/qicoo-mysql-init.sql;']
+        volumeMounts:
+        - name: qicoo-mysql-configmap
+          mountPath: /mnt/configmap
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: qicoo-mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+      volumes:
+      - name: qicoo-mysql-configmap
+        configMap:
+          name: qicoo-mysql-configmap
+      restartPolicy: Never
+  backoffLimit: 4
