@@ -7,7 +7,7 @@
 (For Linux amd64)
 
     wget https://github.com/kubernetes-sigs/kustomize/releases/download/v1.0.8/kustomize_1.0.8_linux_amd64
-    chmod +x ./chmod +x kustomize_1.0.8_linux_amd64
+    chmod +x kustomize_1.0.8_linux_amd64
     sudo mv kustomize_1.0.8_linux_amd64 /usr/local/bin/kustomize
 
 ## Clone manifests and build Kustomized one
