@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qicoo-redis
+  labels:
+    app: qicoo-redis
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: qicoo-redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qicoo-redis
+spec:
+  selector:
+    matchLabels:
+      app: qicoo-redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: qicoo-redis
+    spec:
+      containers:
+      - name: qicoo-redis
+        image: redis:4.0.10
+        ports:
+        - containerPort: 6379
