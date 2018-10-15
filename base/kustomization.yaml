@@ -1,7 +1,7 @@
 namespace: qicoo
 
 resources:
-- 10-qicoo-mysql-secrets.yaml
+- 10-qicoo-mysql-secret.yaml
 - 20-qicoo-mysql.yaml
 - 30-qicoo-redis.yaml
 - 40-qicoo-api.yaml
