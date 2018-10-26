@@ -1,10 +1,11 @@
-namePrefix: develop-
+namespace: development
 commonLabels:
-  variant: develop
+  variant: development
 commonAnnotations:
-  note: Hello, I am development!
+  note: development
 bases:
 - ../../base
-# patches:
-# - replica_count.yaml
-# - cpu_count.yaml
+resources:
+- qicoo-api-namespace.yaml
+patches:
+- qicoo-api-service.yaml

@@ -1,10 +1,17 @@
-namePrefix: staging-
+namespace: staging
 commonLabels:
   variant: staging
 commonAnnotations:
-  note: Hello, I am staging!
+  note: staging
 bases:
 - ../../base
-# patches:
-# - replica_count.yaml
-# - cpu_count.yaml
+resources:
+- qicoo-api-namespace.yaml
+patches:
+- qicoo-api-service.yaml
+# TODO: USE AWS Secret Manager
+secretGenerator:
+- name: qicoo-mysql-secret
+  envCommand: echo MYSQL_ROOT_PASSWORD=my-secret-pw
+  type: Opaque
+  behavior: replace

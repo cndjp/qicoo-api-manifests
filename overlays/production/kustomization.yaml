@@ -1,10 +1,17 @@
-namePrefix: production-
+namespace: production
 commonLabels:
   variant: production
 commonAnnotations:
-  note: Hello, I am production!
+  note: production
 bases:
 - ../../base
-# patches:
-# - replica_count.yaml
-# - cpu_count.yaml
+resources:
+- qicoo-api-namespace.yaml
+patches:
+- qicoo-api-service.yaml
+# TODO: USE AWS Secret Manager
+secretGenerator:
+- name: qicoo-mysql-secret
+  envCommand: echo MYSQL_ROOT_PASSWORD=my-secret-pw
+  type: Opaque
+  behavior: replace
