@@ -3,9 +3,10 @@
 
 
 # 構成の使い分け
+（productionでElastiCacheとRDSを使うところは未実装です）
 
 名前|用途|namespace名|APIの公開|データストア
--|-|-|-|-|-
+-|-|-|-|-
 base|ローカル開発環境|qicoo|NodePort|Redis/MySQLのコンテナ
 development|EKS上の開発環境|development|LoadBalancer|Redis/MySQLのコンテナ
 staging|EKS上のステージング環境|staging|LoadBalancer|Redis/MySQLのコンテナ
