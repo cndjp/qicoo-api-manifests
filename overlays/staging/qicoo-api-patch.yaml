@@ -15,3 +15,14 @@ spec:
   - port: 443
     name: http
     targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qicoo-api
+spec:
+  template:
+    spec:
+      containers:
+      - name: qicoo-api
+        image: cndjp/qicoo-api:CURRENT
