@@ -1,6 +1,18 @@
 # はじめに
 このRepositoryは、QicooのKubernetesマニフェストファイルを管理しています。
 
+
+# 構成の使い分け
+（productionでElastiCacheとRDSを使うところは未実装です）
+
+名前|用途|namespace名|APIの公開|データストア
+-|-|-|-|-
+base|ローカル開発環境|qicoo|NodePort|Redis/MySQLのコンテナ
+development|EKS上の開発環境|development|LoadBalancer|Redis/MySQLのコンテナ
+staging|EKS上のステージング環境|staging|LoadBalancer|Redis/MySQLのコンテナ
+production|EKS上の本番環境|production|LoadBalancer|ElastiCacheとRDS
+
+
 # How to run qicoo API server in local Kubernetes cluster
 
 ## Install Kustomize
@@ -16,7 +28,6 @@
     cd qicoo-api-manifests
     kustomize build ./base -o ./base/qicoo-api-all.yaml
 
-## One more preparation... and apply the Kustomized manifest
+## Apply the Kustomized manifest
 
-    kubectl create namespace qicoo
     kubectl apply -f ./base/qicoo-api-all.yaml

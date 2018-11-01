@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qicoo-api
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: api.qicoo.tokyo
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-west-2:297295734308:certificate/8a2b8c2c-7753-4ce0-8215-32ffb7711c58
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    $patch: delete
+  - port: 443
+    name: http
+    targetPort: 8080
