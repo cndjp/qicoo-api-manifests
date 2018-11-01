@@ -8,7 +8,7 @@ bases:
 resources:
 - qicoo-api-namespace.yaml
 patches:
-- qicoo-api-service.yaml
+- qicoo-api-patch.yaml
 # TODO: USE AWS Secret Manager
 secretGenerator:
 - name: qicoo-mysql-secret
