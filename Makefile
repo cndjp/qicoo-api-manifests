@@ -40,7 +40,7 @@ kustomize-setup:
 build-and-pr:
 	$(eval KUSTOMIZE := $(shell echo $(HOME)/kustomize))
 	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
-	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep -e ^$(PATCH_STAGING)$ -e ^$(PATCH_PRODUCTION)$ ))
+	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep -e ^$(PATCH_STAGING) -e ^$(PATCH_PRODUCTION)))
 	@if test "$(EDITED)" = "$(PATCH_STAGING)"; \
 		then \
 		$(KUSTOMIZE) build $(PATCH_DIR_STAGING) -o $(HOME)/$(MANIFEST_FINAL_NAME); \
@@ -61,3 +61,10 @@ build-and-pr:
 		$(HUB) commit -m "Update the Environment: $(TRAVIS_JOB_ID)" && \
 		$(HUB) push --set-upstream origin "$(BRANCH)" && \
 		$(HUB) pull-request -m "Update the Environment: $(TRAVIS_JOB_ID)"
+
+.PHONY: grep-test
+grep-test:
+	$(eval ABCDEFG := $(shell echo abcedfg))
+	$(eval BCDEFGH := $(shell echo bcedfgh))
+	echo abcedfg | grep -E "^$(ABCDEFG)|^$(BCDEFGH)"
+	echo bcedfgh | grep -e ^$(ABCDEFG) -e ^$(BCDEFGH)
