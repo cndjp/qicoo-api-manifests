@@ -50,10 +50,12 @@ github-pr:
 	@if test "$(EDITED)" = "$(PATCH_RELEASE)"; \
 		then \
 		$(KUSTOMIZE) build ./overlays/staging -o qicoo-api-all.yaml; \
+		ls; \
 		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-staging.git" $(HOME)/qicoo-api-manifests-all; \
 	elif test "$(EDITED)" = "$(PATCH_MASTER)"; \
 		then \
 		$(KUSTOMIZE) build ./overlays/production -o qicoo-api-all.yaml; \
+		ls; \
 		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-production.git" $(HOME)/qicoo-api-manifests-all; \
 	else \
 		exit 1; \
