@@ -1,23 +1,18 @@
-DOTENV := ./.env
-DOTENV_EXISTS := $(shell [ -f $(DOTENV) ] && echo 0 || echo 1 )
-
-ifeq ($(DOTENV_EXISTS), 0)
-	include $(DOTENV)
-	export $(shell sed 's/=.*//' .env)
-endif
-
-NAME	 := qicoo-api-manifest
-TARGET	 := bin/$(NAME)
-SRCS	:= $(shell find . -type f -name '*.yaml')
+MANIFEST_FINAL_NAME := qicoo-api-all.yaml
 
 PATCH_FILE_NAME := qicoo-api-patch.yaml
-PATCH_RELEASE := overlays/staging/$(PATCH_FILE_NAME)
-PATCH_MASTER := overlays/production/$(PATCH_FILE_NAME)
+PATCH_DIR_STAGING := overlays/staging
+PATCH_DIR_PRODUCTION := overlays/production
+PATCH_STAGING := $(PATCH_DIR_STAGING)/$(PATCH_FILE_NAME)
+PATCH_PRODUCTION := $(PATCH_DIR_PRODUCTION)/$(PATCH_FILE_NAME)
+
+REPOSITORY_STAGING = https://github.com/cndjp/qicoo-api-manifests-staging.git
+REPOSITORY_PRODUCTION = https://github.com/cndjp/qicoo-api-manifests-production.git
 
 HUB_VERSION = 2.6.0
+KUSTOMIZE_VERSION = 1.0.9
 
-$(TARGET): github-pr
-	echo run
+$(MANIFEST_FINAL_NAME): build-and-pr
 
 .PHONY: github-setup
 github-setup:
@@ -37,39 +32,32 @@ github-setup:
 
 .PHONY: kustomize-setup
 kustomize-setup:
-	curl -LO "https://github.com/kubernetes-sigs/kustomize/releases/download/v1.0.8/kustomize_1.0.8_linux_amd64"
-	chmod +x kustomize_1.0.8_linux_amd64
-	mv kustomize_1.0.8_linux_amd64 $(HOME)/kustomize
-	ls
-	$(HOME)/kustomize help
+	curl -LO "https://github.com/kubernetes-sigs/kustomize/releases/download/v$(KUSTOMIZE_VERSION)/kustomize_$(KUSTOMIZE_VERSION)_linux_amd64"
+	chmod +x kustomize_$(KUSTOMIZE_VERSION)_linux_amd64
+	mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 $(HOME)/kustomize
 
-.PHONY: github-pr
-github-pr:
-	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
+.PHONY: build-and-pr
+build-and-pr:
 	$(eval KUSTOMIZE := $(shell echo $(HOME)/kustomize))
-	$(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep ^overlays/.*/$(PATCH_FILE_NAME)$
+	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
 	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep ^overlays/.*/$(PATCH_FILE_NAME)$))
-	@if test "$(EDITED)" = "$(PATCH_RELEASE)"; \
+	@if test "$(EDITED)" = "$(PATCH_STAGING)"; \
 		then \
-		echo $(KUSTOMIZE); \
-		$(KUSTOMIZE) build ./overlays/staging -o $(HOME)/qicoo-api-all.yaml; \
-		ls; \
-		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-staging.git" $(HOME)/qicoo-api-manifests-all; \
-	elif test "$(EDITED)" = "$(PATCH_MASTER)"; \
+		$(KUSTOMIZE) build $(PATCH_DIR_STAGING) -o $(HOME)/$(MANIFEST_FINAL_NAME); \
+		$(HUB) clone "$(REPOSITORY_STAGING)" $(HOME)/qicoo-api-manifests-all; \
+	elif test "$(EDITED)" = "$(PATCH_PRODUCTION)"; \
 		then \
-		echo $(KUSTOMIZE); \
-		$(KUSTOMIZE) build ./overlays/production -o $(HOME)/qicoo-api-all.yaml; \
-		ls; \
-		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-production.git" $(HOME)/qicoo-api-manifests-all; \
+		$(KUSTOMIZE) build $(PATCH_DIR_PRODUCTION) -o $(HOME)/$(MANIFEST_FINAL_NAME); \
+		$(HUB) clone "$(REPOSITORY_PRODUCTION)" $(HOME)/qicoo-api-manifests-all; \
 	else \
-		echo error.; \
+		echo "Too many or no file is modified."; \
 		exit 1; \
 	fi
-	$(eval BRANCH := "CI/$(TRAVIS_JOB_NUMBER)")
+	$(eval BRANCH := "CI/$(TRAVIS_JOB_ID)")
 	cd $(HOME)/qicoo-api-manifests-all && \
 		$(HUB) checkout -b $(BRANCH) && \
-		mv $(HOME)/qicoo-api-all.yaml . && \
-	 	$(HUB) add ./qicoo-api-all.yaml && \
-		$(HUB) commit -m "Update the Environment" && \
+		mv $(HOME)/$(MANIFEST_FINAL_NAME) . && \
+	 	$(HUB) add ./$(MANIFEST_FINAL_NAME) && \
+		$(HUB) commit -m "Update the Environment: $(TRAVIS_JOB_ID)" && \
 		$(HUB) push --set-upstream origin "$(BRANCH)" && \
-		$(HUB) pull-request -m "Update the Environment"
+		$(HUB) pull-request -m "Update the Environment: $(TRAVIS_JOB_ID)"
