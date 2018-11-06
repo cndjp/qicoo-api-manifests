@@ -40,7 +40,7 @@ kustomize-setup:
 build-and-pr:
 	$(eval KUSTOMIZE := $(shell echo $(HOME)/kustomize))
 	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
-	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep ^$(PATCH_STAGING)$|^$(PATCH_PRODUCTION)$))
+	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep -e ^$(PATCH_STAGING)$ -e ^$(PATCH_PRODUCTION)$))
 	@if test "$(EDITED)" = "$(PATCH_STAGING)"; \
 		then \
 		$(KUSTOMIZE) build $(PATCH_DIR_STAGING) -o $(HOME)/$(MANIFEST_FINAL_NAME); \
