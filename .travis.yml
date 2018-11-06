@@ -6,6 +6,7 @@ go:
 sudo: required
 
 before_script:
+  - make kustomize-setup
   - make github-setup
 
 script:
