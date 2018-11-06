@@ -25,4 +25,4 @@ spec:
     spec:
       containers:
       - name: qicoo-api
-        image: cndjp/qicoo-api:v0.0.3
+        image: cndjp/qicoo-api:v0.0.4
