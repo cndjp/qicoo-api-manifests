@@ -17,7 +17,6 @@ else ifeq ($(TRAVIS_BRANCH), release)
 endif
 
 HUB_VERSION = 2.6.0
-HUB_VERSION = cndjpintegration
 
 $(TARGET): $(SRCS)
 	# kustomize build ./overlays/$(PHASE) -o qicoo-api-all.yaml
