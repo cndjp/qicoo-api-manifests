@@ -1,0 +1,12 @@
+language: go
+
+go:
+  - "1.11.x"
+
+sudo: required
+
+before_script:
+  - make github-setup
+
+script:
+  - make
