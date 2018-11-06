@@ -52,22 +52,22 @@ github-pr:
 	@if test "$(EDITED)" = "$(PATCH_RELEASE)"; \
 		then \
 		echo $(KUSTOMIZE); \
-		$(KUSTOMIZE) build ./overlays/staging -o qicoo-api-all.yaml; \
+		$(KUSTOMIZE) build ./overlays/staging -o $(HOME)/qicoo-api-all.yaml; \
 		ls; \
 		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-staging.git" $(HOME)/qicoo-api-manifests-all; \
 	elif test "$(EDITED)" = "$(PATCH_MASTER)"; \
 		then \
 		echo $(KUSTOMIZE); \
-		$(KUSTOMIZE) build ./overlays/production -o qicoo-api-all.yaml; \
+		$(KUSTOMIZE) build ./overlays/production -o $(HOME)/qicoo-api-all.yaml; \
 		ls; \
 		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-production.git" $(HOME)/qicoo-api-manifests-all; \
 	else \
+		echo error.
 		exit 1; \
 	fi
 	cd $(HOME)/qicoo-api-manifests-all && \
-		$(HUB) log && \
-		ls
-	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub add . && \
-	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub commit -m "Update the image: cndjp/qicoo-api:$(VERSION)" && \
-	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub push --set-upstream origin "travis/$(VERSION)" && \
-	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub pull-request -m "Update the image: cndjp/qicoo-api:$(VERSION)"
+		cp $(HOME)/qicoo-api-all.yaml ./
+	 	$(HUB) add . && \
+		$(HUB) commit -m "Update the Environment" && \
+		$(HUB) push --set-upstream origin "CI/$(shell date +"%Y/%m/%d-%H:%M:%S")" && \
+		$(HUB) pull-request -m "Update the Environment"
