@@ -10,29 +10,14 @@ NAME	 := qicoo-api-manifest
 TARGET	 := bin/$(NAME)
 SRCS	:= $(shell find . -type f -name '*.yaml')
 
-ifeq ($(TRAVIS_BRANCH), master)
-	export PHASE = production
-else ifeq ($(TRAVIS_BRANCH), release)
-	export PHASE = staging
-endif
+PATCH_FILE_NAME := qicoo-api-patch.yaml
+PATCH_RELEASE := overlays/staging/$(PATCH_FILE_NAME)
+PATCH_MASTER := overlays/production/$(PATCH_FILE_NAME)
 
 HUB_VERSION = 2.6.0
 
-$(TARGET): $(SRCS)
-	# kustomize build ./overlays/$(PHASE) -o qicoo-api-all.yaml
-	$(HUB) log
-	echo $(HUB)
-
-.PHONY: create-dotenv
-create-dotenv:
-	@if [ ! -f $(DOTENV) ]; \
-		then\
-		echo 'Create .env file.' ;\
-		echo 'TRAVIS_BRANCH=master' >> ./.env ;\
-		echo 'TRAVIS=' >> ./.env ;\
-	else \
-		echo Not Work. ;\
-	fi
+$(TARGET): github-pr
+	echo run
 
 .PHONY: github-setup
 github-setup:
@@ -49,21 +34,26 @@ github-setup:
 	git config --global credential.helper "store --file=$(HOME)/.config/git-credential"
 	curl -LO "https://github.com/github/hub/releases/download/v$(HUB_VERSION)/hub-linux-amd64-$(HUB_VERSION).tgz"
 	tar -C "$(HOME)" -zxf "hub-linux-amd64-$(HUB_VERSION).tgz"
-	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
 
-# .PHONY: github-update-manifest
-# github-update-manifest: github-setup
-# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub clone "https://github.com/cndjp/qicoo-api-manifests.git" $(HOME)/qicoo-api-manifests
-# 	cd $(HOME)/qicoo-api-manifests && \
-# 		$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub checkout -b "travis/$(VERSION)"
-# 	@if test "$(TRAVIS_BRANCH)" = "master"; \
-# 		then \
-# 		sed -i -e "s/image: cndjp\/qicoo-api:v[0-9]*.[0-9]*.[0-9]*/image: cndjp\/qicoo-api:$(VERSION)/g" $(HOME)/qicoo-api-manifests/overlays/production/qicoo-api-patch.yaml; \
-# 	else \
-# 		sed -i -e "s/image: cndjp\/qicoo-api@sha256:[0-9a-f]{64}/image: cndjp\/qicoo-api@$(IMAGE_DIGEST)/g" $(HOME)/qicoo-api-manifests/overlays/staging/qicoo-api-patch.yaml; \
-# 	fi
-# 	cd $(HOME)/qicoo-api-manifests && \
-# 		$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub add . && \
-# 		$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub commit -m "Update the image: cndjp/qicoo-api:$(VERSION)" && \
-# 		$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub push --set-upstream origin "travis/$(VERSION)" && \
-# 		$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub pull-request -m "Update the image: cndjp/qicoo-api:$(VERSION)"
+.PHONY: github-pr
+github-pr:
+	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
+	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep $(PATCH_FILE_NAME)))
+	@if test "$(EDITED)" = "$(PATCH_RELEASE)"; \
+		then \
+		kustomize build ./overlays/staging -o qicoo-api-all.yaml; \
+		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-staging.git" $(HOME)/qicoo-api-manifests-all; \
+	elif test "$(EDITED)" = "$(PATCH_MASTER)"; \
+		then \
+		kustomize build ./overlays/production -o qicoo-api-all.yaml; \
+		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-production.git" $(HOME)/qicoo-api-manifests-all; \
+	else \
+		exit 1; \
+	fi
+	cd $(HOME)/qicoo-api-manifests && \
+		$(HUB) log && \
+		ls
+	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub add . && \
+	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub commit -m "Update the image: cndjp/qicoo-api:$(VERSION)" && \
+	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub push --set-upstream origin "travis/$(VERSION)" && \
+	# 	$(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub pull-request -m "Update the image: cndjp/qicoo-api:$(VERSION)"
