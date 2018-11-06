@@ -37,7 +37,7 @@ github-setup:
 
 .PHONY: kustomize-setup
 kustomize-setup:
-    curl -LO "https://github.com/kubernetes-sigs/kustomize/releases/download/v1.0.8/kustomize_1.0.8_linux_amd64"
+	curl -LO "https://github.com/kubernetes-sigs/kustomize/releases/download/v1.0.8/kustomize_1.0.8_linux_amd64"
 	chmod +x kustomize_1.0.8_linux_amd64
 	mv kustomize_1.0.8_linux_amd64 $(HOME)/kustomize
 
