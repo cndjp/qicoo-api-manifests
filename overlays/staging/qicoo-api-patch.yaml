@@ -25,4 +25,4 @@ spec:
     spec:
       containers:
       - name: qicoo-api
-        image: cndjp/qicoo-api:CURRENT
+        image: cndjp/qicoo-api@sha256:0000000000000000000000000000000000000000000000000000000000000000
