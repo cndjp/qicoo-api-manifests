@@ -65,7 +65,7 @@ github-pr:
 		echo error.; \
 		exit 1; \
 	fi
-	$(eval BRANCH := "CI/$(shell echo date +"%Y%m%d-%H:%M:%S")")
+	$(eval BRANCH := "CI/$(TRAVIS_JOB_NUMBER)")
 	cd $(HOME)/qicoo-api-manifests-all && \
 		$(HUB) checkout -b "$(BRANCH)"
 		cp $(HOME)/qicoo-api-all.yaml ./
