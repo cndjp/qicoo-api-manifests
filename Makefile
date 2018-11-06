@@ -62,7 +62,7 @@ github-pr:
 		ls; \
 		$(HUB) clone "https://github.com/cndjp/qicoo-api-manifests-production.git" $(HOME)/qicoo-api-manifests-all; \
 	else \
-		echo error.
+		echo error.; \
 		exit 1; \
 	fi
 	cd $(HOME)/qicoo-api-manifests-all && \
