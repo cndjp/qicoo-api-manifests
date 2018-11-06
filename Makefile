@@ -65,9 +65,11 @@ github-pr:
 		echo error.; \
 		exit 1; \
 	fi
+	$(eval BRANCH := "CI/$(shell echo date +"%Y%m%d-%H:%M:%S")")
 	cd $(HOME)/qicoo-api-manifests-all && \
+		$(HUB) checkout -b "$(BRANCH)"
 		cp $(HOME)/qicoo-api-all.yaml ./
 	 	$(HUB) add . && \
 		$(HUB) commit -m "Update the Environment" && \
-		$(HUB) push --set-upstream origin "CI/$(shell date +"%Y/%m/%d-%H:%M:%S")" && \
+		$(HUB) push --set-upstream origin "$(BRANCH)" && \
 		$(HUB) pull-request -m "Update the Environment"
