@@ -39,6 +39,7 @@ github-setup:
 github-pr:
 	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
 	$(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only
+	$(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep $(PATCH_FILE_NAME)
 	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="hhiroshell" --name-only | grep $(PATCH_FILE_NAME)))
 	@if test "$(EDITED)" = "$(PATCH_RELEASE)"; \
 		then \
