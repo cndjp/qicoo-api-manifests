@@ -1,7 +1,4 @@
-language: go
-
-go:
-  - "1.11.x"
+language: minimal
 
 sudo: required
 
