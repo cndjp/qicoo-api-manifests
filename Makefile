@@ -67,9 +67,9 @@ github-pr:
 	fi
 	$(eval BRANCH := "CI/$(TRAVIS_JOB_NUMBER)")
 	cd $(HOME)/qicoo-api-manifests-all && \
-		$(HUB) checkout -b "$(BRANCH)"
-		cp $(HOME)/qicoo-api-all.yaml ./
-	 	$(HUB) add . && \
+		$(HUB) checkout -b $(BRANCH) && \
+		mv $(HOME)/qicoo-api-all.yaml . && \
+	 	$(HUB) add ./qicoo-api-all.yaml && \
 		$(HUB) commit -m "Update the Environment" && \
 		$(HUB) push --set-upstream origin "$(BRANCH)" && \
 		$(HUB) pull-request -m "Update the Environment"
