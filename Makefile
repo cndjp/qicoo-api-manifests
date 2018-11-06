@@ -22,6 +22,7 @@ HUB_VERSION = cndjpintegration
 $(TARGET): $(SRCS)
 	# kustomize build ./overlays/$(PHASE) -o qicoo-api-all.yaml
 	$(HUB) log
+	echo $(HUB)
 
 .PHONY: create-dotenv
 create-dotenv:
