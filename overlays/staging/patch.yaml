@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qicoo-api
+spec:
+  template:
+    spec:
+      # initContainers:
+      # - name: wait-for-qicoo-redis
+      #   envFrom:
+      #   - secretRef:
+      #       name: qicoo-api-secret-staging
+      # - name: wait-for-qicoo-mysql
+      #   envFrom:
+      #   - secretRef:
+      #       name: qicoo-api-secret-stating
+      containers:
+      - name: qicoo-api
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret-stating

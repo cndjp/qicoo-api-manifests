@@ -1,10 +1,9 @@
-namespace: staging
+namespace: production
 bases:
-- ../../base
-resources:
-- resources/qicoo-api-service.yaml
+- ../../../base
 patches:
 - patch.yaml
+namePrefix: canary-
 imageTags:
   - name: cndjp/qicoo-api
     newTag: v0.0.1-20181112-0000
