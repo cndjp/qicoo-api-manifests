@@ -8,38 +8,31 @@ ifeq ($(DOTACTION_EXISTS), 0)
 	UPDATED_BRANCH := $(branch)
 endif
 
-KUSTOMIZE_ACTION_FILE_NAME := kustomize-action.yaml
-
 ifeq ($(UPDATED_BRANCH), "release")
 	PATCH_DIR := overlays/staging
+	REPOSITORY := https://github.com/cndjp/qicoo-api-manifests-staging.git
+else ifeq ($(UPDATED_BRANCH), "master")
+	PATCH_DIR := overlays/production
+	PATCH_DIR_BASE := $(PATCH_DIR)/spin-base
+	PATCH_DIR_CANARY := $(PATCH_DIR)/spin-canary
+	REPOSITORY := https://github.com/cndjp/qicoo-api-manifests-production.git
 endif
 
-PATCH_FILE_NAME := qicoo-api-patch.yaml
-PATCH := $(PATCH_DIR)/$(PATCH_FILE_NAME)
-# PATCH_DIR_STAGING := overlays/staging
-# PATCH_DIR_PRODUCTION := overlays/production
-# PATCH_STAGING := $(PATCH_DIR_STAGING)/$(PATCH_FILE_NAME)
-# PATCH_PRODUCTION := $(PATCH_DIR_PRODUCTION)/$(PATCH_FILE_NAME)
+KUSTOMIZE_ACTION_FILE_NAME := kustomize-action.yaml
 
-MANIFEST_FINAL_NAME := qicoo-api-all.yaml
-
-REPOSITORY_STAGING := https://github.com/cndjp/qicoo-api-manifests-staging.git
-REPOSITORY_PRODUCTION := https://github.com/cndjp/qicoo-api-manifests-production.git
+MANIFEST_DIR := $(HOME)/manifests
+MANIFEST_FINAL_NAME_ALL := qicoo-api-all.yaml
+MANIFEST_FINAL_NAME_BASE := qicoo-api-base.yaml
+MANIFEST_FINAL_NAME_CANARY := qicoo-api-canary.yaml
 
 HUB_VERSION := 2.6.0
-KUSTOMIZE_VERSION := 1.0.9
+KUSTOMIZE_VERSION := 1.0.10
 
-$(MANIFEST_FINAL_NAME): build-and-pr
+$(MANIFEST_FINAL_NAME_ALL): kustomize-build github-pr
 
 .PHONY: load-kustomize-action
 load-kustomize-action:
 	sed -e 's/:[^:\/\/]/="/g;s/$$/"/g;s/ *=/=/g' ./kustomize-action.yaml > .kustomize-action
-
-.PHONY: status
-status:
-	echo $(DOCKER_IMAGE_TAG)
-	echo $(tag)
-	echo $(UPDATED_BRANCH)
 
 .PHONY: github-setup
 github-setup:
@@ -62,28 +55,27 @@ kustomize-setup:
 	chmod +x kustomize_$(KUSTOMIZE_VERSION)_linux_amd64
 	mv kustomize_$(KUSTOMIZE_VERSION)_linux_amd64 $(HOME)/kustomize
 
-.PHONY: build-and-pr
-build-and-pr:
+.PHONY: kustomize-build
+kustomize-build:
 	$(eval KUSTOMIZE := $(shell echo $(HOME)/kustomize))
-	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
-	$(eval EDITED := $(shell $(HUB) log -n 1 --no-merges --author="$(GITHUB_USER)" --name-only | grep -e ^$(PATCH_STAGING) -e ^$(PATCH_PRODUCTION)))
-	@if test "$(EDITED)" = "$(PATCH_STAGING)"; \
+	mkdir $(MANIFEST_DIR)
+	sed -i -e "s/@@NEW_TAG@@/$(DOCKER_IMAGE_TAG)/g" $(PATCH_DIR)/kustomization.yaml
+	$(KUSTOMIZE) build $(PATCH_DIR) -o $(MANIFEST_DIR)/$(MANIFEST_FINAL_NAME_ALL)
+	@if test "$(UPDATED_BRANCH)" = "master"; \
 		then \
-		$(KUSTOMIZE) build $(PATCH_DIR_STAGING) -o $(HOME)/$(MANIFEST_FINAL_NAME); \
-		$(HUB) clone "$(REPOSITORY_STAGING)" $(HOME)/qicoo-api-manifests-all; \
-	elif test "$(EDITED)" = "$(PATCH_PRODUCTION)"; \
-		then \
-		$(KUSTOMIZE) build $(PATCH_DIR_PRODUCTION) -o $(HOME)/$(MANIFEST_FINAL_NAME); \
-		$(HUB) clone "$(REPOSITORY_PRODUCTION)" $(HOME)/qicoo-api-manifests-all; \
-	else \
-		echo "Too many or no file is modified."; \
-		exit 1; \
+		sed -i -e "s/@@NEW_TAG@@/$(DOCKER_IMAGE_TAG)/g" $(PATCH_DIR_CANARY)/kustomization.yaml; \
+		$(KUSTOMIZE) build $(PATCH_DIR_BASE) -o $(MANIFEST_DIR)/$(MANIFEST_FINAL_NAME_BASE); \
+		$(KUSTOMIZE) build $(PATCH_DIR_CANARY) -o $(MANIFEST_DIR)/$(MANIFEST_FINAL_NAME_CANARY); \
 	fi
-	$(eval BRANCH := "CI/$(TRAVIS_JOB_ID)")
-	cd $(HOME)/qicoo-api-manifests-all && \
-		$(HUB) checkout -b $(BRANCH) && \
-		mv $(HOME)/$(MANIFEST_FINAL_NAME) . && \
-	 	$(HUB) add ./$(MANIFEST_FINAL_NAME) && \
-		$(HUB) commit -m "Update the Environment: $(TRAVIS_JOB_ID)" && \
-		$(HUB) push --set-upstream origin "$(BRANCH)" && \
-		$(HUB) pull-request -m "Update the Environment: $(TRAVIS_JOB_ID)"
+
+.PHONY: github-pr
+github-pr:
+	$(eval HUB := $(shell echo $(HOME)/hub-linux-amd64-$(HUB_VERSION)/bin/hub))
+	$(HUB) clone "$(REPOSITORY)" $(HOME)/qicoo-api-manifests-final
+	cd $(HOME)/qicoo-api-manifests-final && \
+		$(HUB) checkout -b "CI/$(DOCKER_IMAGE_TAG)" && \
+		mv $(MANIFEST_DIR)/* . && \
+	 	$(HUB) add . && \
+		$(HUB) commit -m "[CI]: Update the kustomize-action definition: $(DOCKER_IMAGE_TAG)" && \
+		$(HUB) push --set-upstream origin "CI/$(DOCKER_IMAGE_TAG)" && \
+		$(HUB) pull-request -m "[CI]: Update the kustomize-action definition: $(DOCKER_IMAGE_TAG)"
