@@ -7,6 +7,7 @@ sudo: required
 #     - master
 
 before_script:
+  - make load-kustomize-action
   - make kustomize-setup
   - make github-setup
 
