@@ -13,9 +13,9 @@ spec:
       # - name: wait-for-qicoo-mysql
       #   envFrom:
       #   - secretRef:
-      #       name: qicoo-api-secret-stating
+      #       name: qicoo-api-secret-staging
       containers:
       - name: qicoo-api
         envFrom:
         - secretRef:
-            name: qicoo-api-secret-stating
+            name: qicoo-api-secret-staging
