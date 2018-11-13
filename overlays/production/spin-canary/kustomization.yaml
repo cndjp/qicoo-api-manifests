@@ -6,4 +6,4 @@ patches:
 namePrefix: canary-
 imageTags:
   - name: cndjp/qicoo-api
-    newTag: v0.0.1-20181112-0000
+    newTag: @@NEW_TAG@@

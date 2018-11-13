@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: qicoo-api
+  annotations:
+    dummuy: "For telling spinnaker that this file is needed for cannary analytics: @@NEW_TAG@@"
 spec:
   replicas: 1
   template:

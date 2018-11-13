@@ -1,0 +1,15 @@
+language: minimal
+
+sudo: required
+
+branches:
+  only:
+    - master
+
+before_script:
+  - make load-kustomize-action
+  - make kustomize-setup
+  - make github-setup
+
+script:
+  - make
