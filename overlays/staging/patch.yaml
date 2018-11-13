@@ -17,6 +17,11 @@ spec:
       #       name: qicoo-api-secret-staging
       containers:
       - name: qicoo-api
+        resources:
+          requests:
+            cpu: 200m
+          limits:
+            cpu: 200m
         envFrom:
         - secretRef:
             name: qicoo-api-secret-staging
