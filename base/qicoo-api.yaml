@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qicoo-api
+spec:
+  selector:
+    matchLabels:
+      app: qicoo-api
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: qicoo-api
+    spec:
+      initContainers:
+      - name: wait-for-qicoo-redis
+        image: redis:4.0.10
+        command: ['/bin/sh', '-c']
+        args: ['until redis-cli -h $REDIS_URL ping; do echo waiting for redis; sleep 2; done;']
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret
+      initContainers:
+      - name: wait-for-qicoo-mysql
+        image: mysql:5.6.27
+        command: ['/bin/sh', '-c']
+        args: ['until mysqladmin ping -h$DB_URL -uroot -p$DB_PASSWORD; do echo waiting for mysqldb; sleep 2; done;']
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret
+      containers:
+      - name: qicoo-api
+        image: cndjp/qicoo-api
+        ports:
+        - containerPort: 8080
+          name: http
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 30
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 2
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 30
+          timeoutSeconds: 1
+          successThreshold: 2
+          failureThreshold: 2
+        resources:
+          requests:
+            memory: 1024Mi
+            cpu: 1000m
+          limits:
+            memory: 1024Mi
+            cpu: 1000m
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true

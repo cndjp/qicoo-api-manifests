@@ -73,8 +73,8 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: qicoo-mysql-secret
-              key: MYSQL_ROOT_PASSWORD
+              name: qicoo-api-secret
+              key: DB_PASSWORD
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
@@ -103,27 +103,21 @@ spec:
       - name: wait-for-qicoo-mysql
         image: mysql:5.6.27
         command: ['/bin/sh', '-c']
-        args: ['until mysqladmin ping -hqicoo-mysql -uroot -p$DB_PASSWORD; do echo waiting for mysqldb; sleep 2; done;']
-        env:
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: qicoo-mysql-secret
-              key: MYSQL_ROOT_PASSWORD
+        args: ['until mysqladmin ping -h$DB_URL -u$DB_USER -p$DB_PASSWORD; do echo waiting for mysqldb; sleep 2; done;']
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret
       containers:
       - name: qicoo-mysql-init
         image: mysql:5.6.27
         command: ["/bin/sh", "-c"]
-        args: ['mysql -hqicoo-mysql -uroot -p$DB_PASSWORD < /mnt/configmap/qicoo-mysql-init.sql;']
+        args: ['mysql -h$DB_URL -u$DB_USER -p$DB_PASSWORD < /mnt/configmap/qicoo-mysql-init.sql;']
         volumeMounts:
         - name: qicoo-mysql-configmap
           mountPath: /mnt/configmap
-        env:
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: qicoo-mysql-secret
-              key: MYSQL_ROOT_PASSWORD
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret
       volumes:
       - name: qicoo-mysql-configmap
         configMap:

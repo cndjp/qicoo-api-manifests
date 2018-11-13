@@ -1,17 +1,10 @@
 namespace: production
-commonLabels:
-  variant: production
-commonAnnotations:
-  note: production
 bases:
 - ../../base
 resources:
-- qicoo-api-namespace.yaml
+- resources/qicoo-api-service.yaml
 patches:
-- qicoo-api-patch.yaml
-# TODO: USE AWS Secret Manager
-secretGenerator:
-- name: qicoo-mysql-secret
-  envCommand: echo MYSQL_ROOT_PASSWORD=my-secret-pw
-  type: Opaque
-  behavior: replace
+- patch.yaml
+imageTags:
+  - name: cndjp/qicoo-api
+    newTag: v0.0.1-20181112-0000

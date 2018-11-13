@@ -1,11 +1,12 @@
 namespace: development
-commonLabels:
-  variant: development
-commonAnnotations:
-  note: development
 bases:
 - ../../base
 resources:
-- qicoo-api-namespace.yaml
-patches:
-- qicoo-api-patch.yaml
+- resources/qicoo-api-namespace.yaml
+- resources/qicoo-api-secret.yaml
+- resources/qicoo-api-service.yaml
+- resources/qicoo-mysql.yaml
+- resources/qicoo-redis.yaml
+imageTags:
+  - name: cndjp/qicoo-api
+    newTag: latest
