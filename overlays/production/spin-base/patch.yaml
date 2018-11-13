@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: qicoo-api
   annotations:
-    dummuy: "For telling spinnaker that this file is needed for cannary analytics: @@NEW_TAG@@"
+    dummuy: "For telling spinnaker to use this file: @@NEW_TAG@@"
 spec:
   replicas: 1
   template:
