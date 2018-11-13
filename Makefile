@@ -76,6 +76,6 @@ github-pr:
 		$(HUB) checkout -b "CI/$(DOCKER_IMAGE_TAG)" && \
 		mv $(MANIFEST_DIR)/* . && \
 	 	$(HUB) add . && \
-		$(HUB) commit -m "[CI]: Update the kustomize-action definition: $(DOCKER_IMAGE_TAG)" && \
+		$(HUB) commit -m "[CI]: Update the final manifest(s): $(DOCKER_IMAGE_TAG)" && \
 		$(HUB) push --set-upstream origin "CI/$(DOCKER_IMAGE_TAG)" && \
-		$(HUB) pull-request -m "[CI]: Update the kustomize-action definition: $(DOCKER_IMAGE_TAG)"
+		$(HUB) pull-request -m "[CI]: Update the final manifests(s): $(DOCKER_IMAGE_TAG)"
