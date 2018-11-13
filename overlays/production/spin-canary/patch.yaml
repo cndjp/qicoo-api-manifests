@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qicoo-api
+spec:
+  replicas: 1
+  template:
+    spec:
+      initContainers:
+      - name: wait-for-qicoo-redis
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret-production
+      initContainers:
+      - name: wait-for-qicoo-mysql
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret-production
+      containers:
+      - name: qicoo-api
+        resources:
+          requests:
+            cpu: 200m
+          limits:
+            cpu: 200m
+        envFrom:
+        - secretRef:
+            name: qicoo-api-secret-production
