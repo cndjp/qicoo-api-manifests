@@ -33,6 +33,7 @@ $(MANIFEST_FINAL_NAME_ALL): kustomize-build github-pr
 .PHONY: load-kustomize-action
 load-kustomize-action:
 	sed -e 's/:[^:\/\/]/="/g;s/$$/"/g;s/ *=/=/g' ./kustomize-action.yaml > .kustomize-action
+	cat .kustomize-action
 
 .PHONY: github-setup
 github-setup:
@@ -59,11 +60,10 @@ kustomize-setup:
 kustomize-build:
 	$(eval KUSTOMIZE := $(shell echo $(HOME)/kustomize))
 	mkdir $(MANIFEST_DIR)
-	sed -i -e "s/@@NEW_TAG@@/$(DOCKER_IMAGE_TAG)/g" $(PATCH_DIR)/kustomization.yaml
+	find $(PATCH_DIR) -type f | xargs sed -i -e "s/@@NEW_TAG@@/$(DOCKER_IMAGE_TAG)/g"
 	$(KUSTOMIZE) build $(PATCH_DIR) -o $(MANIFEST_DIR)/$(MANIFEST_FINAL_NAME_ALL)
 	@if test "$(UPDATED_BRANCH)" = "master"; \
 		then \
-		sed -i -e "s/@@NEW_TAG@@/$(DOCKER_IMAGE_TAG)/g" $(PATCH_DIR_CANARY)/kustomization.yaml; \
 		$(KUSTOMIZE) build $(PATCH_DIR_BASE) -o $(MANIFEST_DIR)/$(MANIFEST_FINAL_NAME_BASE); \
 		$(KUSTOMIZE) build $(PATCH_DIR_CANARY) -o $(MANIFEST_DIR)/$(MANIFEST_FINAL_NAME_CANARY); \
 	fi
