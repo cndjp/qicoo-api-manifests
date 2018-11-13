@@ -5,16 +5,15 @@ metadata:
 spec:
   template:
     spec:
-      initContainers:
-      - name: wait-for-qicoo-redis
-        envFrom:
-        - secretRef:
-            name: qicoo-api-secret-staging
-      initContainers:
-      - name: wait-for-qicoo-mysql
-        envFrom:
-        - secretRef:
-            name: qicoo-api-secret-stating
+      # initContainers:
+      # - name: wait-for-qicoo-redis
+      #   envFrom:
+      #   - secretRef:
+      #       name: qicoo-api-secret-staging
+      # - name: wait-for-qicoo-mysql
+      #   envFrom:
+      #   - secretRef:
+      #       name: qicoo-api-secret-stating
       containers:
       - name: qicoo-api
         envFrom:
