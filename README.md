@@ -1,3 +1,5 @@
+[![Travis CI](https://travis-ci.org/cndjp/qicoo-api-manifests.svg?branch=master)](https://travis-ci.org/cndjp/qicoo-api-manifests)
+
 # はじめに
 このRepositoryは、QicooのKubernetesマニフェストファイルを管理しています。
 
