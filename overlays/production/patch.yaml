@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: qicoo-api
 spec:
-  replicas: 
+  replicas: 6
   template:
     spec:
       # initContainers:
