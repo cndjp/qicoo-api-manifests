@@ -25,3 +25,5 @@ spec:
         envFrom:
         - secretRef:
             name: qicoo-api-secret-staging
+        - configMapRef:
+            name: qicoo-api-configmap-staging
