@@ -7,4 +7,4 @@ patches:
 - patch.yaml
 imageTags:
 - name: cndjp/qicoo-api
-  newTag: 0.0.2
+  newTag: @@NEW_TAG@@
