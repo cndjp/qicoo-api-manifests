@@ -46,7 +46,7 @@ spec:
             port: 8080
           initialDelaySeconds: 20
           periodSeconds: 30
-          timeoutSeconds: 1
+          timeoutSeconds: 30
           successThreshold: 1
           failureThreshold: 2
         readinessProbe:
@@ -56,7 +56,7 @@ spec:
             port: 8080
           initialDelaySeconds: 20
           periodSeconds: 30
-          timeoutSeconds: 1
+          timeoutSeconds: 30
           successThreshold: 2
           failureThreshold: 2
         resources:
