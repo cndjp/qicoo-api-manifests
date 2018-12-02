@@ -6,5 +6,5 @@ resources:
 patches:
 - patch.yaml
 imageTags:
-  - name: cndjp/qicoo-api
-    newTag: @@NEW_TAG@@
+- name: cndjp/qicoo-api
+  newTag: @@NEW_TAG@@

@@ -69,6 +69,8 @@ spec:
         envFrom:
         - secretRef:
             name: qicoo-api-secret
+        - configMapRef:
+            name: qicoo-api-configmap
         securityContext:
           privileged: false
           readOnlyRootFilesystem: true
